@@ -35,11 +35,10 @@ export default async function VideosPage() {
       </h1>
       <p className="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
         Превью задаётся полем <code className={CODE}>cover</code> в MDX для сетки
-        и соцпревью (на странице ролика не дублируется). Лучше — прямая ссылка
-        на картинку с VK. Если поля <code className={CODE}>cover</code> нет,
-        пробуем превью со страницы VK по встраиванию; иначе — запасное
-        изображение по slug. Файлы:{" "}
-        <code className={CODE}>src/content/videos/*.mdx</code>.
+        и соцпревью. Без <code className={CODE}>cover</code> можно подтянуть кадр с
+        VK, если в frontmatter есть блок <code className={CODE}>videos</code> с
+        встраиванием; иначе в сетке показывается SVG-заглушка. Файлы:{" "}
+        <code className={CODE}>content/videos/*.mdx</code>.
       </p>
 
       <div className="mt-8 -mx-4 min-h-[70vh] rounded-2xl bg-zinc-950 px-4 py-8 text-zinc-100 shadow-inner ring-1 ring-white/5 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">

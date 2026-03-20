@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import matter from "gray-matter";
+import { cache } from "react";
 
 import type { SiteVideoItem } from "@/types/site-video";
 import type {
@@ -15,11 +16,14 @@ import {
 } from "@/lib/vk-video-thumbnail";
 
 import { normalizeMdxVkVideos } from "./mdx-vk-videos";
+import { getContentRoot } from "./paths";
 
-const CONTENT_ROOT = path.join(process.cwd(), "src", "content");
-const VIDEOS_DIR = path.join(CONTENT_ROOT, "videos");
+function videosDir(): string {
+  return path.join(getContentRoot(), "videos");
+}
 
 function listVideoSlugs(): string[] {
+  const VIDEOS_DIR = videosDir();
   if (!fs.existsSync(VIDEOS_DIR)) return [];
 
   return fs
@@ -88,7 +92,7 @@ function loadVideoPage(
   slug: string,
   options: { requirePublished: boolean },
 ): VideoPageWithBody | null {
-  const filePath = path.join(VIDEOS_DIR, `${slug}.mdx`);
+  const filePath = path.join(videosDir(), `${slug}.mdx`);
   if (!fs.existsSync(filePath)) return null;
 
   const raw = fs.readFileSync(filePath, "utf8");
@@ -111,23 +115,26 @@ function loadVideoPage(
   };
 }
 
-export function getVideoPageBySlug(slug: string): VideoPageWithBody | null {
-  return loadVideoPage(slug, { requirePublished: true });
-}
+export const getVideoPageBySlug = cache(
+  (slug: string): VideoPageWithBody | null =>
+    loadVideoPage(slug, { requirePublished: true }),
+);
 
-export function getPublishedVideoSlugs(): string[] {
+function getPublishedVideoSlugsUncached(): string[] {
   const slugs: string[] = [];
   for (const slug of listVideoSlugs()) {
-    if (loadVideoPage(slug, { requirePublished: true })) slugs.push(slug);
+    if (getVideoPageBySlug(slug)) slugs.push(slug);
   }
   return slugs;
 }
 
-export async function getPublishedVideos(): Promise<SiteVideoItem[]> {
+export const getPublishedVideoSlugs = cache(getPublishedVideoSlugsUncached);
+
+async function getPublishedVideosUncached(): Promise<SiteVideoItem[]> {
   const rows: SiteVideoItem[] = [];
 
   for (const slug of listVideoSlugs()) {
-    const full = loadVideoPage(slug, { requirePublished: true });
+    const full = getVideoPageBySlug(slug);
     if (!full) continue;
     const fm = full.frontmatter;
 
@@ -139,10 +146,6 @@ export async function getPublishedVideos(): Promise<SiteVideoItem[]> {
         if (og) thumbnail = og;
       }
     }
-    if (!thumbnail) {
-      thumbnail = `https://picsum.photos/seed/${encodeURIComponent(slug)}/640/360`;
-    }
-
     rows.push({
       slug,
       title: fm.title,
@@ -156,3 +159,5 @@ export async function getPublishedVideos(): Promise<SiteVideoItem[]> {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 }
+
+export const getPublishedVideos = cache(getPublishedVideosUncached);

@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 
+import { CoverPlaceholder } from "@/components/media/CoverPlaceholder";
 import type { SiteVideoItem } from "@/types/site-video";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +18,12 @@ type VideoGridCardProps = {
   className?: string;
 };
 
+const THUMB_SIZES =
+  "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw";
+
 export function VideoGridCard({ item, className }: VideoGridCardProps) {
+  const thumb = item.thumbnail?.trim() ?? "";
+
   return (
     <Link
       href={`/videos/${item.slug}`}
@@ -26,13 +33,18 @@ export function VideoGridCard({ item, className }: VideoGridCardProps) {
       )}
     >
       <div className="relative aspect-video overflow-hidden rounded-xl bg-zinc-800 ring-1 ring-white/5 transition-[box-shadow,ring-color,transform] duration-[250ms] ease-out group-hover:-translate-y-0.5 group-hover:ring-white/22 group-hover:shadow-lg group-hover:shadow-black/40">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={item.thumbnail}
-          alt=""
-          className="h-full w-full object-cover transition-transform duration-[250ms] ease-out group-hover:scale-[1.03]"
-        />
-        <span className="absolute bottom-2 right-2 rounded bg-black/85 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-white">
+        {thumb ? (
+          <Image
+            src={thumb}
+            alt=""
+            fill
+            className="object-cover transition-transform duration-[250ms] ease-out group-hover:scale-[1.03]"
+            sizes={THUMB_SIZES}
+          />
+        ) : (
+          <CoverPlaceholder className="absolute inset-0 rounded-none bg-zinc-800/80 dark:from-zinc-800 dark:via-zinc-900 dark:to-zinc-950" />
+        )}
+        <span className="absolute bottom-2 right-2 z-10 rounded bg-black/85 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-white">
           {item.duration}
         </span>
       </div>

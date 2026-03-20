@@ -53,29 +53,21 @@ function HomeArticleTeaser({
 
   return (
     <li className="py-4 first:pt-0">
-      <div
-        className={cn(
-          ARTICLE_CARD_SHELL,
-          cover ? "px-0" : "-mx-1 px-1",
-        )}
-      >
+      <div className={cn(ARTICLE_CARD_SHELL, "px-0")}>
         <Link
           href={`${hrefBase}/${item.slug}`}
           className={ARTICLE_CARD_TEASER_LINK}
         >
-          <div className={cn("flex flex-col", cover ? "gap-0" : "gap-3")}>
-            {cover ? (
-              <ArticleCoverThumb
-                src={cover}
-                alt={fm.title}
-                className="w-full !rounded-t-xl !rounded-b-none border-x-0 border-t-0 border-b border-zinc-200 dark:border-zinc-800"
-                sizes={HOME_TEASER_IMAGE_SIZES}
-              />
-            ) : null}
+          <div className="flex flex-col gap-0">
+            <ArticleCoverThumb
+              src={cover}
+              alt={fm.title}
+              className="w-full !rounded-t-xl !rounded-b-none border-x-0 border-t-0 border-b border-zinc-200 dark:border-zinc-800"
+              sizes={HOME_TEASER_IMAGE_SIZES}
+            />
             <div
               className={cn(
-                "min-w-0",
-                cover && "px-3 pt-3",
+                "min-w-0 px-3 pt-3",
                 fm.tags.length === 0 && "pb-3",
               )}
             >
@@ -98,10 +90,7 @@ function HomeArticleTeaser({
         </Link>
         {fm.tags.length > 0 ? (
           <ArticleTagLinks
-            className={cn(
-              "relative z-20 pb-3 pt-2",
-              cover ? "px-3" : "px-1",
-            )}
+            className="relative z-20 px-3 pb-3 pt-2"
             tags={fm.tags.slice(0, 4)}
             section={tagSection}
             size="sm"

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+
+import { CoverPlaceholder } from "@/components/media/CoverPlaceholder";
 import { notFound } from "next/navigation";
 import { compileMDX } from "next-mdx-remote/rsc";
 
@@ -70,27 +72,20 @@ export default async function ReviewArticlePage({ params }: PageProps) {
         {fm.description}
       </p>
 
-      {cover ? (
-        <div className="relative mt-8 aspect-[16/9] w-full max-w-3xl overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900">
-          {cover.startsWith("http://") || cover.startsWith("https://") ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={cover}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <Image
-              src={cover}
-              alt={fm.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 42rem"
-              priority
-            />
-          )}
-        </div>
-      ) : null}
+      <div className="relative mt-8 aspect-[16/9] w-full max-w-3xl overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900">
+        {cover?.trim() ? (
+          <Image
+            src={cover.trim()}
+            alt={fm.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 42rem"
+            priority
+          />
+        ) : (
+          <CoverPlaceholder className="absolute inset-0 rounded-xl" />
+        )}
+      </div>
 
       <VideoSection videos={fm.videos} />
 

@@ -1,9 +1,10 @@
 import Image from "next/image";
 
+import { CoverPlaceholder } from "@/components/media/CoverPlaceholder";
 import { cn } from "@/lib/utils";
 
 type ArticleCoverThumbProps = {
-  src: string;
+  src?: string | null;
   alt: string;
   className?: string;
   sizes?: string;
@@ -15,7 +16,7 @@ export function ArticleCoverThumb({
   className,
   sizes = "(max-width: 768px) 100vw, 32rem",
 }: ArticleCoverThumbProps) {
-  const remote = src.startsWith("http://") || src.startsWith("https://");
+  const url = src?.trim() ?? "";
 
   return (
     <div
@@ -25,21 +26,16 @@ export function ArticleCoverThumb({
         className,
       )}
     >
-      {remote ? (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
-          src={src}
-          alt={alt}
-          className="h-full w-full object-cover"
-        />
-      ) : (
+      {url ? (
         <Image
-          src={src}
+          src={url}
           alt={alt}
           fill
           className="object-cover"
           sizes={sizes}
         />
+      ) : (
+        <CoverPlaceholder className="absolute inset-0" />
       )}
     </div>
   );

@@ -42,14 +42,12 @@ export function ArticleListCard({
           aria-label={`Открыть материал: ${fm.title}`}
         />
         <div className="relative z-10 flex flex-col pointer-events-none">
-          {cover ? (
-            <ArticleCoverThumb
-              src={cover}
-              alt={fm.title}
-              className="w-full !rounded-t-xl !rounded-b-none border-x-0 border-t-0 border-b border-zinc-200 dark:border-zinc-800"
-              sizes="(max-width: 768px) 100vw, 896px"
-            />
-          ) : null}
+          <ArticleCoverThumb
+            src={cover}
+            alt={fm.title}
+            className="w-full !rounded-t-xl !rounded-b-none border-x-0 border-t-0 border-b border-zinc-200 dark:border-zinc-800"
+            sizes="(max-width: 768px) 100vw, 896px"
+          />
           <div
             className={cn(
               "px-4 pt-3.5 pb-3.5 sm:px-5 sm:pt-4 sm:pb-4",

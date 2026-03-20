@@ -42,16 +42,14 @@ export function NewsListCard({ item, showTags = true }: NewsListCardProps) {
             hasTags ? "pb-2 sm:pb-2" : null,
           )}
         >
-          {cover ? (
-            <div className="w-full shrink-0 sm:w-[15.5rem] md:w-[17.75rem] lg:w-80">
-              <ArticleCoverThumb
-                src={cover}
-                alt={fm.title}
-                className="w-full"
-                sizes="(max-width: 640px) 100vw, 320px"
-              />
-            </div>
-          ) : null}
+          <div className="w-full shrink-0 sm:w-[15.5rem] md:w-[17.75rem] lg:w-80">
+            <ArticleCoverThumb
+              src={cover}
+              alt={fm.title}
+              className="w-full"
+              sizes="(max-width: 640px) 100vw, 320px"
+            />
+          </div>
           <div className="flex min-w-0 flex-1 flex-col gap-0">
             <h2 className="text-lg font-semibold leading-snug tracking-normal text-zinc-900 sm:text-xl group-hover:text-zinc-700 dark:text-zinc-50 dark:group-hover:text-zinc-300">
               {fm.title}

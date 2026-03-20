@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import matter from "gray-matter";
+import { cache } from "react";
 
 import type {
   Article,
@@ -11,14 +12,13 @@ import type {
 } from "@/types/article";
 
 import { normalizeMdxVkVideos } from "./mdx-vk-videos";
-
-const CONTENT_ROOT = path.join(process.cwd(), "src", "content");
-
-const NEWS_DIR = path.join(CONTENT_ROOT, "news");
-const REVIEWS_DIR = path.join(CONTENT_ROOT, "reviews");
+import { getContentRoot } from "./paths";
 
 function articleDir(kind: ArticleKind): string {
-  return kind === "news" ? NEWS_DIR : REVIEWS_DIR;
+  const root = getContentRoot();
+  return kind === "news"
+    ? path.join(root, "news")
+    : path.join(root, "reviews");
 }
 
 function listSlugs(kind: ArticleKind): string[] {
@@ -119,7 +119,7 @@ function byDateDesc(a: Article, b: Article): number {
   );
 }
 
-export function getAllNews(): Article[] {
+function getAllNewsUncached(): Article[] {
   const items: Article[] = [];
 
   for (const slug of listSlugs("news")) {
@@ -130,7 +130,9 @@ export function getAllNews(): Article[] {
   return items.sort(byDateDesc);
 }
 
-export function getAllReviews(): Article[] {
+export const getAllNews = cache(getAllNewsUncached);
+
+function getAllReviewsUncached(): Article[] {
   const items: Article[] = [];
 
   for (const slug of listSlugs("reviews")) {
@@ -143,16 +145,16 @@ export function getAllReviews(): Article[] {
   return items.sort(byDateDesc);
 }
 
+export const getAllReviews = cache(getAllReviewsUncached);
+
 export function getAllArticles(): Article[] {
   return [...getAllNews(), ...getAllReviews()].sort(byDateDesc);
 }
 
-export function getArticleBySlug(
-  slug: string,
-  kind: ArticleKind,
-): ArticleWithBody | null {
-  return loadArticleWithBody(kind, slug, { requirePublished: true });
-}
+export const getArticleBySlug = cache(
+  (slug: string, kind: ArticleKind): ArticleWithBody | null =>
+    loadArticleWithBody(kind, slug, { requirePublished: true }),
+);
 
 export function getNewsByTagParam(tagParam: string): Article[] {
   const tag = decodeURIComponent(tagParam);
