@@ -1,65 +1,209 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import Link from "next/link";
 
-export default function Home() {
+import { ArticleTagLinks } from "@/components/article";
+import {
+  ARTICLE_CARD_SHELL,
+  ARTICLE_CARD_TEASER_LINK,
+  ArticleCoverThumb,
+} from "@/components/cards";
+import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
+import { getAllNews, getAllReviews } from "@/lib/content";
+import { absoluteUrl } from "@/lib/seo";
+import type { Article } from "@/types/article";
+import { cn } from "@/lib/utils";
+
+const LATEST_LIMIT = 3;
+
+export const metadata: Metadata = {
+  title: "Главная",
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    url: absoluteUrl("/"),
+  },
+  twitter: {
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
+};
+
+function formatTeaserDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+const HOME_TEASER_IMAGE_SIZES =
+  "(max-width: 1024px) 100vw, (max-width: 1536px) 48vw, 720px";
+
+function HomeArticleTeaser({
+  item,
+  hrefBase,
+}: {
+  item: Article;
+  hrefBase: "/news" | "/reviews";
+}) {
+  const fm = item.frontmatter;
+  const cover = fm.cover;
+  const tagSection = hrefBase === "/news" ? "news" : "reviews";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <li className="py-4 first:pt-0">
+      <div
+        className={cn(
+          ARTICLE_CARD_SHELL,
+          cover ? "px-0" : "-mx-1 px-1",
+        )}
+      >
+        <Link
+          href={`${hrefBase}/${item.slug}`}
+          className={ARTICLE_CARD_TEASER_LINK}
+        >
+          <div className={cn("flex flex-col", cover ? "gap-0" : "gap-3")}>
+            {cover ? (
+              <ArticleCoverThumb
+                src={cover}
+                alt={fm.title}
+                className="w-full !rounded-t-xl !rounded-b-none border-x-0 border-t-0 border-b border-zinc-200 dark:border-zinc-800"
+                sizes={HOME_TEASER_IMAGE_SIZES}
+              />
+            ) : null}
+            <div
+              className={cn(
+                "min-w-0",
+                cover && "px-3 pt-3",
+                fm.tags.length === 0 && "pb-3",
+              )}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                <h3 className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-normal text-zinc-900 group-hover:text-zinc-800 dark:text-zinc-50 dark:group-hover:text-zinc-200">
+                  {fm.title}
+                </h3>
+                <time
+                  dateTime={fm.date}
+                  className="shrink-0 font-mono text-xs tabular-nums leading-none text-zinc-400/80 dark:text-zinc-500/85"
+                >
+                  {formatTeaserDate(fm.date)}
+                </time>
+              </div>
+              <p className="mt-2 line-clamp-2 text-sm leading-[1.72] text-zinc-600 dark:text-zinc-300/95">
+                {fm.description}
+              </p>
+            </div>
+          </div>
+        </Link>
+        {fm.tags.length > 0 ? (
+          <ArticleTagLinks
+            className={cn(
+              "relative z-20 pb-3 pt-2",
+              cover ? "px-3" : "px-1",
+            )}
+            tags={fm.tags.slice(0, 4)}
+            section={tagSection}
+            size="sm"
+            tone="quiet"
+          />
+        ) : null}
+      </div>
+    </li>
+  );
+}
+
+export default function HomePage() {
+  const news = getAllNews().slice(0, LATEST_LIMIT);
+  const reviews = getAllReviews().slice(0, LATEST_LIMIT);
+
+  return (
+    <div className="-mt-2 pb-8 sm:-mt-3">
+      <header className="border-b border-zinc-200/30 pb-8 dark:border-zinc-800/35 sm:pb-8">
+        <p className="max-w-xl font-mono text-xs tabular-nums leading-none text-zinc-500 dark:text-zinc-400">
+          Блог о технике и периферии
+        </p>
+        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-50">
+          {SITE_NAME}
+        </h1>
+        <p className="mt-3 max-w-2xl text-lg font-medium leading-[1.55] text-zinc-700 sm:mt-4 sm:text-xl dark:text-zinc-300">
+          {SITE_DESCRIPTION}
+        </p>
+      </header>
+
+      <div className="mt-10 grid gap-8 sm:mt-12 lg:grid-cols-2 lg:gap-x-16 lg:gap-y-0">
+        <section className="min-w-0" aria-labelledby="latest-news-heading">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-b border-zinc-200/25 pb-3 dark:border-zinc-800/35">
+            <h2
+              id="latest-news-heading"
+              className="text-base font-semibold tracking-normal text-zinc-900 sm:text-lg dark:text-zinc-100"
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+              Новости
+            </h2>
+            <Link
+              href="/news"
+              className="group inline-flex shrink-0 items-center gap-1 rounded-lg border border-transparent px-2.5 py-1.5 text-sm font-semibold text-zinc-800 transition-[color,background-color,border-color,transform,box-shadow] duration-200 ease-out hover:border-zinc-300/80 hover:bg-zinc-100 hover:text-zinc-950 hover:shadow-sm hover:shadow-zinc-900/8 active:scale-[0.98] dark:text-zinc-200 dark:hover:border-zinc-600/50 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-50 dark:hover:shadow-md dark:hover:shadow-black/25"
+            >
+              Все новости
+              <span
+                aria-hidden
+                className="translate-y-px text-zinc-600 transition-[transform,color] duration-200 ease-out group-hover:translate-x-0.5 group-hover:text-zinc-800 dark:text-zinc-400 dark:group-hover:text-zinc-200"
+              >
+                →
+              </span>
+            </Link>
+          </div>
+          {news.length === 0 ? (
+            <p className="mt-8 text-sm text-zinc-600 dark:text-zinc-400">
+              Пока нет материалов.
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-y-[0.5px] divide-zinc-200/18 dark:divide-zinc-800/24">
+              {news.map((item) => (
+                <HomeArticleTeaser key={item.slug} item={item} hrefBase="/news" />
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="min-w-0" aria-labelledby="latest-reviews-heading">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-b border-zinc-200/25 pb-3 dark:border-zinc-800/35">
+            <h2
+              id="latest-reviews-heading"
+              className="text-base font-semibold tracking-normal text-zinc-900 sm:text-lg dark:text-zinc-100"
+            >
+              Обзоры
+            </h2>
+            <Link
+              href="/reviews"
+              className="group inline-flex shrink-0 items-center gap-1 rounded-lg border border-transparent px-2.5 py-1.5 text-sm font-semibold text-zinc-800 transition-[color,background-color,border-color,transform,box-shadow] duration-200 ease-out hover:border-zinc-300/80 hover:bg-zinc-100 hover:text-zinc-950 hover:shadow-sm hover:shadow-zinc-900/8 active:scale-[0.98] dark:text-zinc-200 dark:hover:border-zinc-600/50 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-50 dark:hover:shadow-md dark:hover:shadow-black/25"
+            >
+              Все обзоры
+              <span
+                aria-hidden
+                className="translate-y-px text-zinc-600 transition-[transform,color] duration-200 ease-out group-hover:translate-x-0.5 group-hover:text-zinc-800 dark:text-zinc-400 dark:group-hover:text-zinc-200"
+              >
+                →
+              </span>
+            </Link>
+          </div>
+          {reviews.length === 0 ? (
+            <p className="mt-8 text-sm text-zinc-600 dark:text-zinc-400">
+              Пока нет материалов.
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-y-[0.5px] divide-zinc-200/18 dark:divide-zinc-800/24">
+              {reviews.map((item) => (
+                <HomeArticleTeaser
+                  key={item.slug}
+                  item={item}
+                  hrefBase="/reviews"
+                />
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
