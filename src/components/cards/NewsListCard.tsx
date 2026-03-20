@@ -1,39 +1,38 @@
 import Link from "next/link";
 
 import { ArticleTagLinks } from "@/components/article";
+import type { Locale } from "@/i18n/config";
+import { getMessages } from "@/i18n/messages";
+import { withLocale } from "@/i18n/paths";
+import type { Article } from "@/types/article";
+import { formatShortDate } from "@/lib/format-date";
+import { cn } from "@/lib/utils";
+
 import { ARTICLE_CARD_SHELL_NEWS_LIST } from "./article-card-interactive";
 import { ArticleCoverThumb } from "@/components/cards/ArticleCoverThumb";
-import type { Article } from "@/types/article";
-import { cn } from "@/lib/utils";
 
 type NewsListCardProps = {
   item: Article;
+  locale: Locale;
   showTags?: boolean;
 };
 
-function formatListDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
+const stretchLinkClass =
+  "absolute inset-0 z-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-50 dark:focus-visible:ring-zinc-500/45 dark:focus-visible:ring-offset-zinc-950";
 
-export function NewsListCard({ item, showTags = true }: NewsListCardProps) {
+export function NewsListCard({ item, locale, showTags = true }: NewsListCardProps) {
   const fm = item.frontmatter;
   const cover = fm.cover;
   const hasTags = showTags && fm.tags.length > 0;
-
-  const stretchLinkClass =
-    "absolute inset-0 z-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-50 dark:focus-visible:ring-zinc-500/45 dark:focus-visible:ring-offset-zinc-950";
+  const m = getMessages(locale);
 
   return (
     <article className="border-b border-b-[0.5px] border-zinc-200/14 pb-4 last:border-b-0 dark:border-zinc-800/22 sm:pb-5">
       <div className={cn(ARTICLE_CARD_SHELL_NEWS_LIST, "relative cursor-pointer")}>
         <Link
-          href={`/news/${item.slug}`}
+          href={withLocale(locale, `/news/${item.slug}`)}
           className={stretchLinkClass}
-          aria-label={`Открыть материал: ${fm.title}`}
+          aria-label={`${m.openArticle}: ${fm.title}`}
         />
         <div
           className={cn(
@@ -55,7 +54,7 @@ export function NewsListCard({ item, showTags = true }: NewsListCardProps) {
               {fm.title}
             </h2>
             <p className="mt-2 font-mono text-xs tabular-nums leading-none text-zinc-400/80 dark:text-zinc-500/85">
-              <time dateTime={fm.date}>{formatListDate(fm.date)}</time>
+              <time dateTime={fm.date}>{formatShortDate(fm.date, locale)}</time>
               <span
                 aria-hidden
                 className="mx-1.5 text-zinc-300/70 dark:text-zinc-600/70"
@@ -74,8 +73,10 @@ export function NewsListCard({ item, showTags = true }: NewsListCardProps) {
             className="relative z-20 px-4 pb-2.5 pt-2 pointer-events-auto sm:px-5 sm:pb-3"
             tags={fm.tags}
             section="news"
+            locale={locale}
             size="sm"
             tone="quiet"
+            tagsAriaLabel={m.tagListAria}
           />
         ) : null}
       </div>

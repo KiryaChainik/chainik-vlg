@@ -2,31 +2,27 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { CoverPlaceholder } from "@/components/media/CoverPlaceholder";
+import type { Locale } from "@/i18n/config";
+import { withLocale } from "@/i18n/paths";
 import type { SiteVideoItem } from "@/types/site-video";
+import { formatShortDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
-
-function formatVideoDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 type VideoGridCardProps = {
   item: SiteVideoItem;
+  locale: Locale;
   className?: string;
 };
 
 const THUMB_SIZES =
   "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw";
 
-export function VideoGridCard({ item, className }: VideoGridCardProps) {
+export function VideoGridCard({ item, locale, className }: VideoGridCardProps) {
   const thumb = item.thumbnail?.trim() ?? "";
 
   return (
     <Link
-      href={`/videos/${item.slug}`}
+      href={withLocale(locale, `/videos/${item.slug}`)}
       className={cn(
         "group block cursor-pointer outline-none transition-[transform,opacity] duration-[250ms] ease-out active:scale-[0.99]",
         className,
@@ -54,7 +50,7 @@ export function VideoGridCard({ item, className }: VideoGridCardProps) {
             {item.title}
           </h2>
           <p className="mt-1 text-xs text-zinc-500/85">
-            {formatVideoDate(item.date)}
+            {formatShortDate(item.date, locale)}
           </p>
         </div>
       </div>

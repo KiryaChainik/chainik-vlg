@@ -4,9 +4,10 @@ import { isVkVideoEmbedUrlAllowed, VideoEmbed } from "./VideoEmbed";
 
 type VideoSectionProps = {
   videos?: ArticleVideo[];
+  ariaLabel?: string;
 };
 
-export function VideoSection({ videos }: VideoSectionProps) {
+export function VideoSection({ videos, ariaLabel = "Встроенное видео" }: VideoSectionProps) {
   if (!videos?.length) return null;
 
   const primary = videos.find((v) => v.primary);
@@ -21,7 +22,7 @@ export function VideoSection({ videos }: VideoSectionProps) {
   return (
     <section
       className="mt-8 w-full max-w-3xl"
-      aria-label="Встроенное видео"
+      aria-label={ariaLabel}
     >
       <VideoEmbed provider={video.provider} embedUrl={video.embedUrl} />
     </section>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import type { Locale } from "@/i18n/config";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import type { ArticleWithBody } from "@/types/article";
 import type { VideoPageWithBody } from "@/types/video-page";
@@ -21,9 +22,14 @@ function coverToOgImage(
   return [{ url, alt }];
 }
 
+function ogLocale(locale: Locale | undefined): string {
+  return locale === "en" ? "en_US" : "ru_RU";
+}
+
 export function metadataForVideoPage(
   item: VideoPageWithBody,
   pathname: string,
+  contentLocale?: Locale,
 ): Metadata {
   const { title, description, cover, author } = item.frontmatter;
   const url = absoluteUrl(pathname);
@@ -36,7 +42,7 @@ export function metadataForVideoPage(
     authors: author ? [{ name: author }] : undefined,
     openGraph: {
       type: "website",
-      locale: "ru_RU",
+      locale: ogLocale(contentLocale),
       url,
       siteName: SITE_NAME,
       title: socialTitle,
@@ -55,6 +61,7 @@ export function metadataForVideoPage(
 export function metadataForArticle(
   item: ArticleWithBody,
   pathname: string,
+  contentLocale?: Locale,
 ): Metadata {
   const { title, description, date, cover, author } = item.frontmatter;
   const url = absoluteUrl(pathname);
@@ -67,7 +74,7 @@ export function metadataForArticle(
     authors: author ? [{ name: author }] : undefined,
     openGraph: {
       type: "article",
-      locale: "ru_RU",
+      locale: ogLocale(contentLocale),
       url,
       siteName: SITE_NAME,
       title: socialTitle,

@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
 
+import type { Locale } from "@/i18n/config";
+import { withLocale } from "@/i18n/paths";
 import { cn } from "@/lib/utils";
 
 export type ArticleTagSection = "news" | "reviews";
@@ -7,10 +11,12 @@ export type ArticleTagSection = "news" | "reviews";
 type ArticleTagLinksProps = {
   tags: string[];
   section: ArticleTagSection;
+  locale: Locale;
   size?: "sm" | "md";
   /** Спокойнее: для карточек списков, чтобы не перетягивать внимание с заголовка */
   tone?: "default" | "quiet";
   className?: string;
+  tagsAriaLabel?: string;
 };
 
 const linkStyles = {
@@ -23,13 +29,16 @@ const linkStyles = {
 export function ArticleTagLinks({
   tags,
   section,
+  locale,
   size = "md",
   tone = "default",
   className,
+  tagsAriaLabel = "Теги",
 }: ArticleTagLinksProps) {
   if (tags.length === 0) return null;
 
-  const prefix = section === "news" ? "/news/tag" : "/reviews/tag";
+  const prefix =
+    section === "news" ? "/news/tag" : "/reviews/tag";
 
   const linkClass =
     size === "sm" && tone === "quiet"
@@ -43,12 +52,12 @@ export function ArticleTagLinks({
         tone === "quiet" && "gap-1 opacity-95",
         className,
       )}
-      aria-label="Теги"
+      aria-label={tagsAriaLabel}
     >
       {tags.map((tag, index) => (
         <li key={`${index}-${tag}`}>
           <Link
-            href={`${prefix}/${encodeURIComponent(tag)}`}
+            href={withLocale(locale, `${prefix}/${encodeURIComponent(tag)}`)}
             className={linkClass}
           >
             {tag}

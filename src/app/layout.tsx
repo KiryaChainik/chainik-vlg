@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 
-import { Container, Footer } from "@/components/layout";
-import { Header } from "@/components/layout/Header";
+import { HtmlLangSync } from "@/components/i18n/HtmlLangSync";
 import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
 import { absoluteUrl } from "@/lib/seo";
 
@@ -46,20 +46,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const h = await headers();
+  const lang = h.get("x-next-locale") === "en" ? "en" : "ru";
+
   return (
     <html
-      lang="ru"
+      lang={lang}
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-svh flex-col bg-zinc-50 font-sans text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
-        <Header />
-        <Container className="flex-1">{children}</Container>
-        <Footer />
+        <HtmlLangSync />
+        {children}
       </body>
     </html>
   );

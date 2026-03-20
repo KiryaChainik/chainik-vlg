@@ -12,7 +12,19 @@ import type {
 } from "@/types/article";
 
 import { normalizeMdxVkVideos } from "./mdx-vk-videos";
+import {
+  type NewsDatePeriod,
+  filterNewsByDatePeriod,
+} from "./news-date-period";
 import { getContentRoot } from "./paths";
+
+export type { NewsDatePeriod } from "./news-date-period";
+export {
+  NEWS_DATE_PERIODS,
+  articlePublishedStartOfDayMs,
+  filterNewsByDatePeriod,
+  parseNewsDatePeriod,
+} from "./news-date-period";
 
 function articleDir(kind: ArticleKind): string {
   const root = getContentRoot();
@@ -146,6 +158,42 @@ function getAllReviewsUncached(): Article[] {
 }
 
 export const getAllReviews = cache(getAllReviewsUncached);
+
+export type ArticleListWindow = {
+  items: Article[];
+  total: number;
+};
+
+/** Срез отсортированного списка новостей (для страницы списка и API подгрузки). */
+export function getNewsListWindow(
+  offset: number,
+  limit: number,
+  period?: NewsDatePeriod | null,
+): ArticleListWindow {
+  const all = getAllNews();
+  const list =
+    period != null ? filterNewsByDatePeriod(all, period) : all;
+  const safeOffset = Math.max(0, offset);
+  const safeLimit = Math.max(0, limit);
+  return {
+    items: list.slice(safeOffset, safeOffset + safeLimit),
+    total: list.length,
+  };
+}
+
+/** Срез отсортированного списка обзоров. */
+export function getReviewsListWindow(
+  offset: number,
+  limit: number,
+): ArticleListWindow {
+  const all = getAllReviews();
+  const safeOffset = Math.max(0, offset);
+  const safeLimit = Math.max(0, limit);
+  return {
+    items: all.slice(safeOffset, safeOffset + safeLimit),
+    total: all.length,
+  };
+}
 
 export function getAllArticles(): Article[] {
   return [...getAllNews(), ...getAllReviews()].sort(byDateDesc);

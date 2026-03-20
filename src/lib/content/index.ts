@@ -5,10 +5,17 @@ export {
   getAllReviews,
   getArticleBySlug,
   getNewsByTagParam,
+  getNewsListWindow,
   getNewsTagParamsForStatic,
   getReviewsByTagParam,
+  getReviewsListWindow,
   getReviewsTagParamsForStatic,
+  NEWS_DATE_PERIODS,
+  articlePublishedStartOfDayMs,
+  filterNewsByDatePeriod,
+  parseNewsDatePeriod,
 } from "./articles";
+export type { ArticleListWindow, NewsDatePeriod } from "./articles";
 export {
   getPublishedVideos,
   getPublishedVideoSlugs,
