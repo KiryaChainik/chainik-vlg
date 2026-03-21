@@ -6,6 +6,7 @@ import { getMessages } from "@/i18n/messages";
 import { withLocale } from "@/i18n/paths";
 import type { Article } from "@/types/article";
 import { formatShortDate } from "@/lib/format-date";
+import { stripTelegramSpoilerMarkers, TelegramSpoilerAsItalic } from "@/lib/telegram-text";
 import { cn } from "@/lib/utils";
 
 import { ARTICLE_CARD_SHELL_NEWS_LIST } from "./article-card-interactive";
@@ -15,12 +16,19 @@ type NewsListCardProps = {
   item: Article;
   locale: Locale;
   showTags?: boolean;
+  /** Первые карточки в ленте — для LCP (next/image priority). */
+  coverPriority?: boolean;
 };
 
 const stretchLinkClass =
   "absolute inset-0 z-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-50 dark:focus-visible:ring-zinc-500/45 dark:focus-visible:ring-offset-zinc-950";
 
-export function NewsListCard({ item, locale, showTags = true }: NewsListCardProps) {
+export function NewsListCard({
+  item,
+  locale,
+  showTags = true,
+  coverPriority = false,
+}: NewsListCardProps) {
   const fm = item.frontmatter;
   const cover = fm.cover;
   const hasTags = showTags && fm.tags.length > 0;
@@ -32,7 +40,7 @@ export function NewsListCard({ item, locale, showTags = true }: NewsListCardProp
         <Link
           href={withLocale(locale, `/news/${item.slug}`)}
           className={stretchLinkClass}
-          aria-label={`${m.openArticle}: ${fm.title}`}
+          aria-label={`${m.openArticle}: ${stripTelegramSpoilerMarkers(fm.title)}`}
         />
         <div
           className={cn(
@@ -44,14 +52,15 @@ export function NewsListCard({ item, locale, showTags = true }: NewsListCardProp
           <div className="w-full shrink-0 sm:w-[15.5rem] md:w-[17.75rem] lg:w-80">
             <ArticleCoverThumb
               src={cover}
-              alt={fm.title}
+              alt={stripTelegramSpoilerMarkers(fm.title)}
               className="w-full"
               sizes="(max-width: 640px) 100vw, 320px"
+              priority={coverPriority}
             />
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-0">
             <h2 className="text-lg font-semibold leading-snug tracking-normal text-zinc-900 sm:text-xl group-hover:text-zinc-700 dark:text-zinc-50 dark:group-hover:text-zinc-300">
-              {fm.title}
+              <TelegramSpoilerAsItalic text={fm.title} />
             </h2>
             <p className="mt-2 font-mono text-xs tabular-nums leading-none text-zinc-400/80 dark:text-zinc-500/85">
               <time dateTime={fm.date}>{formatShortDate(fm.date, locale)}</time>
@@ -63,9 +72,11 @@ export function NewsListCard({ item, locale, showTags = true }: NewsListCardProp
               </span>
               {fm.category}
             </p>
-            <p className="mt-3 line-clamp-2 text-sm leading-[1.55] text-zinc-600 dark:text-zinc-400">
-              {fm.description}
-            </p>
+            {fm.description.trim() ? (
+              <p className="mt-3 line-clamp-2 text-sm leading-[1.55] text-zinc-600 dark:text-zinc-400">
+                <TelegramSpoilerAsItalic text={fm.description} />
+              </p>
+            ) : null}
           </div>
         </div>
         {hasTags ? (

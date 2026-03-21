@@ -69,6 +69,9 @@ export type Messages = {
   newsFilterMonth: string;
   newsFilterYear: string;
   newsEmptyPeriod: string;
+  mdxImageLightboxOpen: string;
+  mdxImageLightboxClose: string;
+  mdxImageLightboxDialog: string;
 };
 
 const ru: Messages = {
@@ -147,6 +150,9 @@ const ru: Messages = {
   newsFilterMonth: "Месяц",
   newsFilterYear: "Год",
   newsEmptyPeriod: "За выбранный период новостей нет.",
+  mdxImageLightboxOpen: "Увеличить изображение",
+  mdxImageLightboxClose: "Закрыть",
+  mdxImageLightboxDialog: "Просмотр изображения",
 };
 
 const en: Messages = {
@@ -225,6 +231,9 @@ const en: Messages = {
   newsFilterMonth: "Month",
   newsFilterYear: "Year",
   newsEmptyPeriod: "No news for this period.",
+  mdxImageLightboxOpen: "Open image fullscreen",
+  mdxImageLightboxClose: "Close",
+  mdxImageLightboxDialog: "Image viewer",
 };
 
 const byLocale: Record<Locale, Messages> = { ru, en };

@@ -21,10 +21,14 @@ export function VideoSection({ videos, ariaLabel = "Встроенное вид�
 
   return (
     <section
-      className="mt-8 w-full max-w-3xl"
+      className="mt-8 w-full min-w-0 max-w-3xl overflow-x-clip"
       aria-label={ariaLabel}
     >
-      <VideoEmbed provider={video.provider} embedUrl={video.embedUrl} />
+      <VideoEmbed
+        provider={video.provider}
+        embedUrl={video.embedUrl}
+        orientation={video.orientation}
+      />
     </section>
   );
 }

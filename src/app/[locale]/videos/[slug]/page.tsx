@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { compileMDX } from "next-mdx-remote/rsc";
-
 import { VideoSection } from "@/components/video";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getMessages } from "@/i18n/messages";
 import { withLocale } from "@/i18n/paths";
 import {
+  compileArticleMdx,
   getPublishedVideoSlugs,
   getVideoPageBySlug,
-  mdxComponents,
 } from "@/lib/content";
 import { formatShortDate } from "@/lib/format-date";
 import { metadataForVideoPage } from "@/lib/seo";
@@ -46,11 +44,7 @@ export default async function VideoPage({ params }: PageProps) {
   const item = getVideoPageBySlug(slug);
   if (!item) notFound();
 
-  const { content } = await compileMDX({
-    source: item.body,
-    options: { parseFrontmatter: false },
-    components: mdxComponents,
-  });
+  const { content } = await compileArticleMdx(item.body);
 
   const fm = item.frontmatter;
 

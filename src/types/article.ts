@@ -7,6 +7,8 @@ export type ArticleVideo = {
   embedUrl: string;
   title: string;
   primary: boolean;
+  /** Вертикальное VK: контейнер 9:16, высота не больше ~70vh (иначе 16:9). */
+  orientation?: "portrait" | "landscape";
 };
 
 export type ArticleFrontmatter = {

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { headers } from "next/headers";
 
 import { HtmlLangSync } from "@/components/i18n/HtmlLangSync";
 import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
@@ -46,17 +45,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const h = await headers();
-  const lang = h.get("x-next-locale") === "en" ? "en" : "ru";
-
+  /* Без headers()/cookies(): корневой layout остаётся статичным; lang для /en — HtmlLangSync после гидрации. */
   return (
     <html
-      lang={lang}
+      lang="ru"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >

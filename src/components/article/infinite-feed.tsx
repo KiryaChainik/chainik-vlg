@@ -39,6 +39,9 @@ export function useInfiniteArticleFeed(
         offset: String(offsetRef.current),
         limit: String(pageSize),
       });
+      if (kind === "news" && newsPeriod != null) {
+        params.set("period", newsPeriod);
+      }
       const res = await fetch(`${path}?${params}`);
       if (!res.ok) throw new Error("fetch failed");
       const data = (await res.json()) as FeedResponse;
@@ -47,7 +50,11 @@ export function useInfiniteArticleFeed(
         offsetRef.current = total;
         return;
       }
-      setItems((prev) => [...prev, ...data.items]);
+      setItems((prev) => {
+        const seen = new Set(prev.map((p) => p.slug));
+        const fresh = data.items.filter((item) => !seen.has(item.slug));
+        return [...prev, ...fresh];
+      });
       offsetRef.current += data.items.length;
     } catch {
       errorRef.current = true;

@@ -30,12 +30,14 @@ export function HomeColumnFeed({
   return (
     <>
       <ul className="mt-4 divide-y divide-y-[0.5px] divide-zinc-200/18 dark:divide-zinc-800/24">
-        {items.map((item) => (
+        {items.map((item, index) => (
           <HomeArticleTeaser
             key={item.slug}
             item={item}
             hrefBase={hrefBase}
             locale={locale}
+            /* Один приоритет на главной — первая новость (типичный LCP); обзоры без priority. */
+            coverPriority={kind === "news" && index === 0}
           />
         ))}
       </ul>

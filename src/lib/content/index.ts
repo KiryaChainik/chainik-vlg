@@ -1,3 +1,5 @@
+export { shouldHideArticleHero } from "./article-hero-visibility";
+export { compileArticleMdx } from "./mdx-compile";
 export { mdxComponents } from "./mdx-components";
 export {
   getAllArticles,

@@ -1,5 +1,7 @@
 import type { ArticleVideo } from "@/types/article";
 
+type ArticleVideoOrientation = NonNullable<ArticleVideo["orientation"]>;
+
 export function normalizeMdxVkVideos(raw: unknown): ArticleVideo[] | undefined {
   if (raw == null) return undefined;
   if (!Array.isArray(raw)) return undefined;
@@ -21,11 +23,20 @@ export function normalizeMdxVkVideos(raw: unknown): ArticleVideo[] | undefined {
         ? String(o.title).trim()
         : "Видео";
 
+    const orientRaw = o.orientation != null ? String(o.orientation).toLowerCase() : "";
+    const orientation: ArticleVideoOrientation | undefined =
+      orientRaw === "portrait" || orientRaw === "vertical"
+        ? "portrait"
+        : orientRaw === "landscape"
+          ? "landscape"
+          : undefined;
+
     out.push({
       provider: "vk",
       embedUrl,
       title,
       primary: Boolean(o.primary),
+      ...(orientation ? { orientation } : {}),
     });
   }
 

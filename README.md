@@ -43,6 +43,8 @@ npm run dev
 
 **Картинки:** удалённые обложки и превью идут через `next/image` (AVIF/WebP). Разрешённые хосты — в `next.config.ts` (`remotePatterns`); для нового CDN добавь запись туда.
 
+**Разработка (Turbopack):** если в консоли появляются `Persisting failed` / `Compaction failed` / `Unable to write SST file` — это внутренний кэш dev-сервера (часто после удаления `.next` на лету, нескольких `next dev` или гонок записи). Останови dev, удали каталог **`.next`**, запусти `npm run dev` снова; держи один процесс dev и по возможности одну вкладку, активно дергающую hot reload.
+
 ### Переменные окружения
 
 Скопируй `.env.example` в `.env.local` и при необходимости задай:
@@ -57,14 +59,14 @@ npm run dev
 | Путь | Назначение |
 | ---- | ---------- |
 | `src/app/` | маршруты Next.js: сегмент **`[locale]`** (`ru` / `en`), страницы главная, новости, обзоры, видео, о проекте |
-| `src/middleware.ts` | редирект с `/` на `/ru` или `/en`, cookie локали |
+| `src/proxy.ts` | редирект с `/` на `/ru` или `/en`, cookie локали (раньше `middleware`) |
 | `src/i18n/` | локали, словари UI (`messages.ts`), хелперы путей |
-| `content/` | твой MDX-контент (не в git): `news/`, `reviews/`, `videos/` |
+| `content/` | MDX: `news/`, `reviews/`, `videos/` — можно держать в git вместе с медиа в `public/`. Папка выгрузки Telegram (`vlg-parser/ChatExport*`) в git не кладётся (см. `.gitignore`). Для **каждого** раздела отдельно: если в `content/<раздел>/` нет ни одного `.mdx`, подставляется **`content.example/<раздел>/`** (можно иметь только новости в `content/news/`, а обзоры и видео брать из примера). |
 | `content.example/` | пример MDX в репозитории; скопируй в `content/` (подробности и таблица демо с заглушками — `content.example/README.md`) |
 | `src/components/` | UI: шапка, футер, карточки, видео |
 | `src/lib/` | контент-логика, SEO, константы сайта |
 
-Тексты разделов и метаданные бренда — в `src/lib/constants/site.ts`. Контент читается из `content/`, если папка есть, иначе из `content.example/`. Переменная **`CONTENT_DIR`** переопределяет корень (см. `.env.example`).
+Тексты разделов и метаданные бренда — в `src/lib/constants/site.ts`. Загрузка MDX: для `news/`, `reviews/`, `videos/` — свой каталог (`content/…` или при отсутствии файлов — `content.example/…`). Переменная **`CONTENT_DIR`** задаёт один корень для всех трёх (см. `.env.example`).
 
 ### Контент (MDX)
 
@@ -78,6 +80,8 @@ npm run dev
 На **`/news`** доступен фильтр по дате публикации: query `period=today|week|month|year` и пункт «Все»; та же отсечка участвует в подгрузке (`/api/news/feed?period=…`). Даты в MDX вида `YYYY-MM-DD` сравниваются как **календарный день в локальном времени сервера**. **Год:** с **1 января предыдущего календарного года** 00:00 (не «ровно 365 дней назад»). **Неделя:** с полуночи (сегодня − 7 дней). **Месяц:** та же дата − 1 месяц.
 
 После правок контента: `npm run dev` или `npm run build`.
+
+**Экспорт из Telegram (парсер):** каталог `vlg-parser/` — перед новым прогоном скрипт может полностью очищать `content/…/news/`, обложки парсера и кэш Next.js (см. `vlg-parser/README.md`). Проверка без удаления: `npm run content:clean -- --dry-run`.
 
 ### Лицензия и вклад
 
@@ -124,6 +128,8 @@ Open [http://localhost:3000](http://localhost:3000). The root URL redirects to *
 
 **Images:** remote covers and video thumbs use `next/image` (AVIF/WebP). Allowed hosts are listed in `next.config.ts` under `remotePatterns`—add entries for new CDNs.
 
+**Dev (Turbopack):** messages like `Persisting failed`, `Compaction failed`, or `Unable to write SST file` come from the dev server’s internal cache (often after deleting `.next` while running, multiple `next dev` instances, or concurrent writes). Stop dev, remove **`.next`**, run `npm run dev` again; keep a single dev process and avoid many tabs hammering hot reload.
+
 ### Environment
 
 Copy `.env.example` to `.env.local` and set as needed:
@@ -138,14 +144,14 @@ Do not commit real secrets; `.env*` files are gitignored except `.env.example`.
 | Path | Role |
 | ---- | ---- |
 | `src/app/` | Next.js App Router under **`[locale]`** (`ru` / `en`): home, news, reviews, video, about |
-| `src/middleware.ts` | redirects `/` → `/ru` or `/en`, persists locale cookie |
+| `src/proxy.ts` | redirects `/` → `/ru` or `/en`, persists locale cookie (formerly `middleware`) |
 | `src/i18n/` | locales, UI strings (`messages.ts`), path helpers |
-| `content/` | your MDX (`news/`, `reviews/`, `videos/`) — gitignored |
+| `content/` | MDX (`news/`, `reviews/`, `videos/`) — can live in the repo with media under `public/`. Telegram export dirs (`vlg-parser/ChatExport*`) stay gitignored. **Per section:** if `content/<section>/` has no `.mdx`, that section is read from **`content.example/<section>/`** (e.g. only `content/news/` while reviews/videos use the demo). |
 | `content.example/` | sample MDX in repo; copy to `content/` (see `content.example/README.md` for demo placeholders) |
 | `src/components/` | layout, cards, video UI |
 | `src/lib/` | content loading, SEO, site constants |
 
-Site name, nav, and social defaults: `src/lib/constants/site.ts`. MDX is loaded from `content/` if present, otherwise `content.example/`. Override with **`CONTENT_DIR`** (see `.env.example`).
+Site name, nav, and social defaults: `src/lib/constants/site.ts`. MDX resolves per section (`content/…` or `content.example/…` when a section has no files). **`CONTENT_DIR`** sets one root for all sections (see `.env.example`).
 
 ### MDX content
 

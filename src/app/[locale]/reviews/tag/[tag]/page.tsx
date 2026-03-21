@@ -75,12 +75,13 @@ export default async function ReviewsTagPage({ params }: PageProps) {
         {countLabel}
       </p>
       <div className="mt-8">
-        {articles.map((item) => (
+        {articles.map((item, index) => (
           <ArticleListCard
             key={item.slug}
             item={item}
             locale={locale}
             hrefBase="/reviews"
+            coverPriority={index < 4}
           />
         ))}
       </div>

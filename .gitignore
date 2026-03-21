@@ -25,6 +25,8 @@
 # misc
 .DS_Store
 *.pem
+__pycache__/
+*.py[cod]
 
 # debug
 npm-debug.log*
@@ -36,8 +38,9 @@ yarn-error.log*
 .env*
 !.env.example
 
-# Локальный MDX-контент (в репозитории — см. content.example/)
-/content/
+# MDX (`content/`) и статика в `public/` (обложки, `news-media` и т.д.) — коммитим.
+# Экспорт Telegram (result.json, тяжёлые медиа из выгрузки) — не в git:
+/vlg-parser/ChatExport*/
 
 # vercel
 .vercel

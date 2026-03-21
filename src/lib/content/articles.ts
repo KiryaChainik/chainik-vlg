@@ -16,7 +16,7 @@ import {
   type NewsDatePeriod,
   filterNewsByDatePeriod,
 } from "./news-date-period";
-import { getContentRoot } from "./paths";
+import { getContentDirForSection } from "./paths";
 
 export type { NewsDatePeriod } from "./news-date-period";
 export {
@@ -27,10 +27,61 @@ export {
 } from "./news-date-period";
 
 function articleDir(kind: ArticleKind): string {
-  const root = getContentRoot();
-  return kind === "news"
-    ? path.join(root, "news")
-    : path.join(root, "reviews");
+  return getContentDirForSection(kind === "news" ? "news" : "reviews");
+}
+
+/** Декодирует сегмент пути (на случай двойного кодирования в URL). */
+function decodeSlugParam(slug: string): string {
+  let s = slug;
+  for (let i = 0; i < 3; i += 1) {
+    if (!s.includes("%")) break;
+    try {
+      const next = decodeURIComponent(s);
+      if (next === s) break;
+      s = next;
+    } catch {
+      break;
+    }
+  }
+  return s;
+}
+
+/**
+ * Находит файл *.mdx по slug из маршрута: учитывает NFC/NFD (macOS/APFS) и
+ * расхождения между URL и именем файла на диске.
+ */
+function resolveMdxFile(
+  kind: ArticleKind,
+  slugParam: string,
+): { filePath: string; canonicalSlug: string } | null {
+  const dir = articleDir(kind);
+  if (!fs.existsSync(dir)) return null;
+
+  const decoded = decodeSlugParam(slugParam);
+  const nfc = decoded.normalize("NFC");
+
+  const tryNames = [
+    decoded,
+    nfc,
+    decoded.normalize("NFD"),
+    nfc.normalize("NFD"),
+  ];
+  const seen = new Set<string>();
+  for (const name of tryNames) {
+    if (seen.has(name)) continue;
+    seen.add(name);
+    const fp = path.join(dir, `${name}.mdx`);
+    if (fs.existsSync(fp)) return { filePath: fp, canonicalSlug: name };
+  }
+
+  for (const f of fs.readdirSync(dir)) {
+    if (!f.endsWith(".mdx")) continue;
+    const base = f.slice(0, -4);
+    if (base.normalize("NFC") === nfc) {
+      return { filePath: path.join(dir, f), canonicalSlug: base };
+    }
+  }
+  return null;
 }
 
 function listSlugs(kind: ArticleKind): string[] {
@@ -67,7 +118,7 @@ function normalizeFrontmatter(raw: unknown): ArticleFrontmatter | null {
     d.category != null ? String(d.category).trim() : "";
   const author = d.author != null ? String(d.author).trim() : "";
 
-  if (!title || !description || !date || !category || !author) return null;
+  if (!title || !date || !category || !author) return null;
 
   const published = Boolean(d.published);
   const tags = toStrArray(d.tags);
@@ -97,22 +148,26 @@ function loadArticleWithBody(
   slug: string,
   options: { requirePublished: boolean },
 ): ArticleWithBody | null {
-  const filePath = path.join(articleDir(kind), `${slug}.mdx`);
-  if (!fs.existsSync(filePath)) return null;
+  const resolved = resolveMdxFile(kind, slug);
+  if (!resolved) return null;
+
+  const { filePath, canonicalSlug } = resolved;
 
   const raw = fs.readFileSync(filePath, "utf8");
   const { data, content } = matter(raw);
   const frontmatter = normalizeFrontmatter(data);
 
   if (!frontmatter) {
-    console.warn(`[content] пропуск «${kind}/${slug}.mdx»: некорректный frontmatter`);
+    console.warn(
+      `[content] пропуск «${kind}/${canonicalSlug}.mdx»: некорректный frontmatter`,
+    );
     return null;
   }
 
   if (options.requirePublished && !frontmatter.published) return null;
 
   return {
-    slug,
+    slug: canonicalSlug,
     kind,
     frontmatter,
     body: content.trim(),

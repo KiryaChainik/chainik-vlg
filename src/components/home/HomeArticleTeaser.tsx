@@ -12,6 +12,7 @@ import type { Locale } from "@/i18n/config";
 import { getMessages } from "@/i18n/messages";
 import { withLocale } from "@/i18n/paths";
 import { formatShortDate } from "@/lib/format-date";
+import { stripTelegramSpoilerMarkers, TelegramSpoilerAsItalic } from "@/lib/telegram-text";
 import type { Article } from "@/types/article";
 import { cn } from "@/lib/utils";
 
@@ -22,12 +23,14 @@ type HomeArticleTeaserProps = {
   item: Article;
   hrefBase: "/news" | "/reviews";
   locale: Locale;
+  coverPriority?: boolean;
 };
 
 export function HomeArticleTeaser({
   item,
   hrefBase,
   locale,
+  coverPriority = false,
 }: HomeArticleTeaserProps) {
   const fm = item.frontmatter;
   const cover = fm.cover;
@@ -44,9 +47,10 @@ export function HomeArticleTeaser({
           <div className="flex flex-col gap-0">
             <ArticleCoverThumb
               src={cover}
-              alt={fm.title}
+              alt={stripTelegramSpoilerMarkers(fm.title)}
               className="w-full !rounded-t-xl !rounded-b-none border-x-0 border-t-0 border-b border-zinc-200 dark:border-zinc-800"
               sizes={HOME_TEASER_IMAGE_SIZES}
+              priority={coverPriority}
             />
             <div
               className={cn(
@@ -56,7 +60,7 @@ export function HomeArticleTeaser({
             >
               <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                 <h3 className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-normal text-zinc-900 group-hover:text-zinc-800 dark:text-zinc-50 dark:group-hover:text-zinc-200">
-                  {fm.title}
+                  <TelegramSpoilerAsItalic text={fm.title} />
                 </h3>
                 <time
                   dateTime={fm.date}
@@ -65,9 +69,11 @@ export function HomeArticleTeaser({
                   {formatShortDate(fm.date, locale)}
                 </time>
               </div>
-              <p className="mt-2 line-clamp-2 text-sm leading-[1.72] text-zinc-600 dark:text-zinc-300/95">
-                {fm.description}
-              </p>
+              {fm.description.trim() ? (
+                <p className="mt-2 line-clamp-2 text-sm leading-[1.72] text-zinc-600 dark:text-zinc-300/95">
+                  <TelegramSpoilerAsItalic text={fm.description} />
+                </p>
+              ) : null}
             </div>
           </div>
         </Link>

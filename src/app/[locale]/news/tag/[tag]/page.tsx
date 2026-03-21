@@ -75,8 +75,13 @@ export default async function NewsTagPage({ params }: PageProps) {
         {countLabel}
       </p>
       <div className="mt-8">
-        {articles.map((item) => (
-          <NewsListCard key={item.slug} item={item} locale={locale} />
+        {articles.map((item, index) => (
+          <NewsListCard
+            key={item.slug}
+            item={item}
+            locale={locale}
+            coverPriority={index < 4}
+          />
         ))}
       </div>
     </div>

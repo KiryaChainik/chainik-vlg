@@ -16,10 +16,10 @@ import {
 } from "@/lib/vk-video-thumbnail";
 
 import { normalizeMdxVkVideos } from "./mdx-vk-videos";
-import { getContentRoot } from "./paths";
+import { getContentDirForSection } from "./paths";
 
 function videosDir(): string {
-  return path.join(getContentRoot(), "videos");
+  return getContentDirForSection("videos");
 }
 
 function listVideoSlugs(): string[] {

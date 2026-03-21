@@ -10,7 +10,9 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "content:clean": "python3 vlg-parser/scripts/tg_export_to_mdx.py --clean-only",
+    "content:export": "python3 vlg-parser/scripts/tg_export_to_mdx.py"
   },
   "dependencies": {
     "clsx": "^2.1.1",

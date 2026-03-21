@@ -40,15 +40,21 @@ export function ArticleFeed({
   return (
     <>
       <div className="mt-8">
-        {items.map((item) =>
+        {items.map((item, index) =>
           kind === "news" ? (
-            <NewsListCard key={item.slug} item={item} locale={locale} />
+            <NewsListCard
+              key={item.slug}
+              item={item}
+              locale={locale}
+              coverPriority={index < 4}
+            />
           ) : (
             <ArticleListCard
               key={item.slug}
               item={item}
               locale={locale}
               hrefBase="/reviews"
+              coverPriority={index < 4}
             />
           ),
         )}

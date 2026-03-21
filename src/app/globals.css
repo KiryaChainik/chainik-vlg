@@ -27,3 +27,28 @@ body {
 .mdx-content > *:first-child {
   margin-top: 0;
 }
+
+/*
+ * Видеофайлы в теле статьи: в MDX явный <video /> не проходит через components.video
+ * (см. recma-jsx-rewrite: _mdxExplicitJsx). Стили здесь гарантированно применяются в Chrome.
+ */
+.mdx-content video {
+  display: block !important;
+  max-height: 70vh !important;
+  max-width: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  margin-block: 1.5rem !important;
+  margin-inline: 0 !important;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(228 228 231);
+  background-color: rgb(244 244 245);
+}
+
+@media (prefers-color-scheme: dark) {
+  .mdx-content video {
+    border-color: rgb(39 39 42);
+    background-color: rgb(24 24 27);
+  }
+}

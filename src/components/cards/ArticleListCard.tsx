@@ -6,6 +6,7 @@ import { getMessages } from "@/i18n/messages";
 import { withLocale } from "@/i18n/paths";
 import type { Article } from "@/types/article";
 import { formatShortDate } from "@/lib/format-date";
+import { stripTelegramSpoilerMarkers, TelegramSpoilerAsItalic } from "@/lib/telegram-text";
 import { cn } from "@/lib/utils";
 
 import { ARTICLE_CARD_SHELL_NEWS_LIST } from "./article-card-interactive";
@@ -16,6 +17,7 @@ type ArticleListCardProps = {
   locale: Locale;
   hrefBase: "/news" | "/reviews";
   showTags?: boolean;
+  coverPriority?: boolean;
 };
 
 const stretchLinkClass =
@@ -26,6 +28,7 @@ export function ArticleListCard({
   locale,
   hrefBase,
   showTags = true,
+  coverPriority = false,
 }: ArticleListCardProps) {
   const fm = item.frontmatter;
   const cover = fm.cover;
@@ -39,14 +42,15 @@ export function ArticleListCard({
         <Link
           href={withLocale(locale, `${hrefBase}/${item.slug}`)}
           className={stretchLinkClass}
-          aria-label={`${m.openArticle}: ${fm.title}`}
+          aria-label={`${m.openArticle}: ${stripTelegramSpoilerMarkers(fm.title)}`}
         />
         <div className="relative z-10 flex flex-col pointer-events-none">
           <ArticleCoverThumb
             src={cover}
-            alt={fm.title}
+            alt={stripTelegramSpoilerMarkers(fm.title)}
             className="w-full !rounded-t-xl !rounded-b-none border-x-0 border-t-0 border-b border-zinc-200 dark:border-zinc-800"
             sizes="(max-width: 768px) 100vw, 896px"
+            priority={coverPriority}
           />
           <div
             className={cn(
@@ -55,7 +59,7 @@ export function ArticleListCard({
             )}
           >
             <h2 className="text-lg font-semibold leading-snug tracking-normal text-zinc-900 sm:text-xl group-hover:text-zinc-700 dark:text-zinc-50 dark:group-hover:text-zinc-300">
-              {fm.title}
+              <TelegramSpoilerAsItalic text={fm.title} />
             </h2>
             <p className="mt-2 font-mono text-xs tabular-nums leading-none text-zinc-400/80 dark:text-zinc-500/85">
               <time dateTime={fm.date}>{formatShortDate(fm.date, locale)}</time>
@@ -67,9 +71,11 @@ export function ArticleListCard({
               </span>
               {fm.category}
             </p>
-            <p className="mt-3 line-clamp-2 text-sm leading-[1.55] text-zinc-600 dark:text-zinc-400">
-              {fm.description}
-            </p>
+            {fm.description.trim() ? (
+              <p className="mt-3 line-clamp-2 text-sm leading-[1.55] text-zinc-600 dark:text-zinc-400">
+                <TelegramSpoilerAsItalic text={fm.description} />
+              </p>
+            ) : null}
           </div>
         </div>
         {hasTags ? (

@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  experimental: {
+    optimizePackageImports: ["clsx"],
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
